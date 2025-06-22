@@ -1,16 +1,11 @@
-import { MongoClient, ObjectId } from 'mongodb'
-
-const DEFAULT_CONFIG =
-  'mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.3.8'
-
-const uri = process.env.URI_MONGODB ?? DEFAULT_CONFIG
-const client = new MongoClient(uri)
+import { connection } from './connection.js'
 
 async function connect() {
   try {
+    const client = connection()
     await client.connect()
-    const database = client.db('blogs')
-    return database.collection('blog')
+    const database = client.db('tasks')
+    return database.collection('task')
   } catch (error) {
     console.error('Error connecting to the database')
     await client.close()
@@ -18,5 +13,15 @@ async function connect() {
 }
 
 export class TodoModel {
-  static gellAll() {}
+  static async gellAll() {
+    const db = await connect()
+  }
+
+  static async create({ input }) {
+    console.log(input)
+    const db = await connect()
+    const insertedId = await db.insertOne(input)
+    console.log(insertedId)
+    return insertedId
+  }
 }
