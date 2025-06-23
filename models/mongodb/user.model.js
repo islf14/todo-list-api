@@ -17,10 +17,10 @@ export class UserModel {
   static async create({ input }) {
     const { name, email, password } = input
     const db = await connect()
-    // verify  that it is unique
+    // verify that it is unique
     const userFound = await db.findOne({ email })
-    if (userFound) return false
-    // user
+    if (userFound) throw new Error('user already exist')
+    // create user
     const hashedPassword = await bcrypt.hash(
       password,
       parseInt(process.env.SALT_ROUNDS)
@@ -39,9 +39,9 @@ export class UserModel {
     const db = await connect()
     // find user
     const user = await db.findOne({ email })
-    if (!user) return false
+    if (!user) throw new Error('user not found')
     const valid = await bcrypt.compare(password, user.password)
-    if (!valid) return false
+    if (!valid) throw new Error('password invalid')
     // return all except password
     const { password: _, ...showUser } = user
     return showUser
