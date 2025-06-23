@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt'
 import { connection } from './connection.js'
+import { UUID } from 'mongodb'
 
 async function connect() {
   try {
@@ -21,11 +22,13 @@ export class UserModel {
     const userFound = await db.findOne({ email })
     if (userFound) throw new Error('user already exist')
     // create user
+    const _id = new UUID()
     const hashedPassword = await bcrypt.hash(
       password,
       parseInt(process.env.SALT_ROUNDS)
     )
     const newUser = {
+      _id,
       name,
       email,
       password: hashedPassword

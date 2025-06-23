@@ -1,3 +1,4 @@
+import { UUID } from 'mongodb'
 import { connection } from './connection.js'
 
 async function connect() {
@@ -18,10 +19,17 @@ export class TodoModel {
   }
 
   static async create({ input }) {
-    console.log(input)
     const db = await connect()
-    const insertedId = await db.insertOne(input)
-    console.log(insertedId)
+    const _id = new UUID()
+    const newTask = {
+      _id,
+      ...input
+    }
+    const { insertedId } = await db.insertOne(newTask)
     return insertedId
+  }
+
+  static update({ input }) {
+    console.log(input)
   }
 }

@@ -5,23 +5,24 @@ import jwt from 'jsonwebtoken'
 export class UserController {
   register = async (req, res) => {
     if (!req.body)
-      return res.status(400).json({ message: 'please inter valid values' })
+      return res.status(400).json({ message: 'please enter valid values' })
     const result = validateUser(req.body)
     if (result.error) {
       return res.status(400).json({ error: JSON.parse(result.error.message) })
     }
     try {
-      const user = await UserModel.create({ input: result.data })
-      return res.status(201).json({ user })
+      const insertedId = await UserModel.create({ input: result.data })
+      console.log(insertedId)
+      return res.status(201).json({ insertedId })
     } catch (error) {
       console.log({ error: error.message })
-      return res.status(400).json({ error: 'error in create' })
+      return res.status(400).json({ error: 'error in register' })
     }
   }
 
   login = async (req, res) => {
     if (!req.body)
-      return res.status(400).json({ message: 'please inter valid values' })
+      return res.status(400).json({ message: 'please enter valid values' })
     const result = validateLogin(req.body)
     if (result.error) {
       return res.status(400).json({ error: JSON.parse(result.error.message) })
