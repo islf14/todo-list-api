@@ -10,6 +10,7 @@ export const createTodoRouter = () => {
   todoRouter.get('/', todoController.getAll)
   todoRouter.post('/', todoController.create)
   todoRouter.put('/:id', todoController.update)
+  todoRouter.delete('/:id', todoController.delete)
 
   return todoRouter
 }
