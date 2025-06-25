@@ -3,8 +3,34 @@ import { validatePartialTodo, validateTodo } from './todo.validator.js'
 
 export class TodoController {
   getAll = async (req, res) => {
-    const tasks = await TodoModel.getAll()
-    res.json(tasks)
+    const { page, limit } = req.query
+    //set page and limit
+    let pageNumber = parseInt(page)
+    let nPerPage = parseInt(limit)
+    if (isNaN(pageNumber) || pageNumber <= 0) pageNumber = 1
+    if (isNaN(nPerPage) || nPerPage <= 0) nPerPage = 20
+
+    // count all tasks
+    const count = await TodoModel.countAll({ userId: req.session.user._id })
+    // find in db
+    try {
+      const data = await TodoModel.getAll({
+        userId: req.session.user._id,
+        pageNumber,
+        nPerPage
+      })
+      // return data
+      const tasks = {
+        data,
+        page: pageNumber,
+        limit: nPerPage,
+        total: count
+      }
+      res.json(tasks)
+    } catch (error) {
+      console.log(error.message)
+      return res.status(400).json('error getting all')
+    }
   }
 
   create = async (req, res) => {
@@ -16,7 +42,7 @@ export class TodoController {
     try {
       const insertedId = await TodoModel.create({
         input: result.data,
-        user: req.session.user
+        userId: req.session.user._id
       })
       return res.json({ insertedId })
     } catch (error) {
@@ -43,7 +69,7 @@ export class TodoController {
     }
 
     // verify permission
-    if (task.user_id === req.session.user.id) {
+    if (task.user_id === req.session.user._id) {
       // send idTask and data to Update
       try {
         const updated = await TodoModel.update({
@@ -70,8 +96,8 @@ export class TodoController {
       console.log({ error: error.message })
       return res.status(400).json({ error: error.message })
     }
-
-    if (task.user_id === req.session.user.id) {
+    // verify permission
+    if (task.user_id === req.session.user._id) {
       try {
         await TodoModel.delete({ _id: task._id })
         return res.status(204).json('deleted')

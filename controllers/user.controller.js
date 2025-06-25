@@ -32,7 +32,7 @@ export class UserController {
       // generate token
       const token = jwt.sign(
         {
-          id: user._id,
+          _id: user._id,
           name: user.name,
           email: user.email
         },

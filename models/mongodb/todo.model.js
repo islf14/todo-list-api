@@ -14,19 +14,39 @@ async function connect() {
 }
 
 export class TodoModel {
-  static async getAll() {
+  static async countAll({ userId }) {
     const db = await connect()
-    const data = await db.find().toArray()
-    return data
+    try {
+      const count = await db.countDocuments({ user_id: userId })
+      return count
+    } catch (error) {
+      throw new Error('error count all')
+    }
   }
 
-  static async create({ input, user }) {
+  static async getAll({ userId, pageNumber, nPerPage }) {
+    const db = await connect()
+    try {
+      const data = await db
+        .find({ user_id: userId })
+        .sort({ createdAt: 1 })
+        .skip(pageNumber > 1 ? (pageNumber - 1) * nPerPage : 0)
+        .limit(nPerPage)
+        .toArray()
+      return data
+    } catch (error) {
+      console.log(error)
+      throw new Error('erro getting all tasks')
+    }
+  }
+
+  static async create({ input, userId }) {
     const db = await connect()
     const _id = new UUID()
     const newTask = {
       _id,
       ...input,
-      user_id: user.id,
+      user_id: userId,
       createdAt: new Date(),
       updatedAt: new Date()
     }
